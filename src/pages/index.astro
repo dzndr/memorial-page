@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Gallery from '../components/Gallery.astro';
+import publicContent from '../../.generated/public.json';
+import { configuration, getSession } from '../lib/auth.mjs';
+
+const config = configuration();
+const isLoggedIn = getSession(Astro.request, config);
+---
+<Layout title={publicContent.title} lifeDates={publicContent.lifeDates} isLoggedIn={isLoggedIn}><p class="intro">{publicContent.introduction}</p><Gallery photos={publicContent.public}/></Layout>
