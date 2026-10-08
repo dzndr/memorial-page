@@ -1,6 +1,6 @@
 # Memorial website
 
-A light, responsive memorial website with a public gallery and a password-protected area for family and friends. Astro renders `/` at build time; the Node server handles sign-in, the private gallery, and private WebP images. PhotoSwipe provides zoom, arrow-key navigation, Escape to close, and touch navigation. Without JavaScript, image links open the large image version. The included abstract SVGs are neutral placeholders. Music is not integrated yet; a dedicated Astro component can be added to the layout later.
+A light, responsive memorial website with a public gallery and a password-protected area for family and friends. Astro renders `/` at build time; the Node server handles sign-in, the private gallery, and private WebP images. PhotoSwipe provides zoom, arrow-key navigation, Escape to close, and touch navigation. Without JavaScript, image links open the large image version. The included abstract SVGs are neutral placeholders. The public page includes YouTube and Spotify music examples above the photos. Each official player loads only after the visitor clicks its consent button; closing it removes the iframe. No consent is persisted. Direct links also work without JavaScript. Edit the music examples in `src/components/Music.astro` and include the providers in the site's privacy notice before publishing.
 
 ## Setup
 
