@@ -5,21 +5,75 @@ const isPrivateGallery = Astro.url.pathname === '/private' || Astro.url.pathname
 ---
 <!doctype html>
 <html lang="de">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content={privatePage ? 'noindex, nofollow' : 'index, follow'}/><title>{title}</title></head>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content={privatePage ? 'noindex, nofollow' : 'index, follow'}/><title>{title}</title>
+  <script is:inline>
+    (() => {
+      let preference;
+      try { preference = localStorage.getItem('theme'); } catch {}
+      const theme = preference === 'light' || preference === 'dark'
+        ? preference
+        : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
 <body>
   <a class="skip" href="#inhalt">Zum Inhalt</a>
   <header>
     <span class="brand">Erinnerungen</span>
     <nav aria-label="Hauptnavigation">
-      {privatePage ? <a href="/">Öffentliche Galerie</a> : <span aria-current="page">Öffentliche Galerie</span>}
-      {privatePage ? <span aria-current="page">Privater Bereich</span> : <a href="/private/">Privater Bereich</a>}
-      {isLoggedIn && <form method="post" action="/api/logout"><button class="quiet" type="submit">Abmelden</button></form>}
+      <div class="nav-items">
+        {privatePage ? <a href="/">Öffentliche Galerie</a> : <span aria-current="page">Öffentliche Galerie</span>}
+        {privatePage ? <span aria-current="page">Privater Bereich</span> : <a href="/private/">Privater Bereich</a>}
+        {isLoggedIn && <form method="post" action="/api/logout"><button class="quiet" type="submit">Abmelden</button></form>}
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Dunkelmodus aktivieren" title="Dunkelmodus aktivieren" aria-pressed="false">
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+      </button>
     </nav>
   </header>
   <main id="inhalt"><div class="heading"><span class="eyebrow">Was bleibt, ist die Liebe</span><h1>{title}</h1>{lifeDates && <p class="dates">{lifeDates}</p>}<span class="line" aria-hidden="true"></span></div><slot/></main>
   <footer>Ein Ort für Erinnerungen.</footer>
 </body>
 </html>
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  function updateToggle() {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const label = dark ? 'Hellmodus aktivieren' : 'Dunkelmodus aktivieren';
+    toggle?.setAttribute('aria-pressed', String(dark));
+    toggle?.setAttribute('aria-label', label);
+    toggle?.setAttribute('title', label);
+  }
+  toggle?.addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('theme', theme); } catch {}
+    updateToggle();
+  });
+  systemTheme.addEventListener('change', ({ matches }) => {
+    let preference;
+    try { preference = localStorage.getItem('theme'); } catch {}
+    if (preference !== 'light' && preference !== 'dark') {
+      document.documentElement.dataset.theme = matches ? 'dark' : 'light';
+      updateToggle();
+    }
+  });
+  updateToggle();
+</script>
 <style is:global>
-:root{font-family:system-ui,sans-serif;color:#434840;background:#faf9f5;font-synthesis:none}*{box-sizing:border-box}body{margin:0}a{color:inherit;text-underline-offset:4px}header{max-width:1160px;margin:auto;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid #e4e5dc}.brand{font-family:Georgia,serif;font-size:23px;text-decoration:none}nav{display:flex;align-items:center;gap:24px;font-size:14px}nav a{cursor:pointer}nav a:hover{cursor:pointer}nav [aria-current="page"]{text-decoration:none;cursor:default}nav form{margin:0}main{max-width:1100px;margin:auto;padding:64px 32px}.heading{text-align:center;margin-bottom:40px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.2em;color:#727865}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(32px,5vw,52px);line-height:1.15;margin:20px 0}.dates{color:#727865}.line{display:block;width:44px;height:1px;background:#9da58d;margin:28px auto}.intro{text-align:center;max-width:590px;margin:0 auto 48px;line-height:1.8;color:#656b5f}.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}figure{margin:0}.gallery a{display:block;overflow:hidden;border-radius:4px;background:#eeede5}.gallery img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .3s}.gallery a:hover img{transform:scale(1.025)}figcaption{font-size:14px;padding:16px 0;color:#656b5f}footer{text-align:center;padding:32px;font-family:Georgia,serif;font-style:italic;color:#7a806e;border-top:1px solid #e4e5dc}.login{max-width:400px;margin:auto;padding:32px;background:#fff;border:1px solid #e4e5dc;border-radius:6px}label{display:block;margin-bottom:10px}input{font:inherit;width:100%;padding:12px;border:1px solid #8b927f;border-radius:3px}button{font:inherit;background:#555f49;color:white;padding:12px 24px;border:0;border-radius:3px;cursor:pointer}.login button{margin-top:20px;width:100%}.quiet{padding:0;background:transparent;color:inherit;text-decoration:underline;text-underline-offset:4px}.error{color:#923a32;line-height:1.5}.skip{position:absolute;top:-100px;left:12px}.skip:focus{top:12px;background:white;padding:12px;z-index:10}:focus-visible{outline:3px solid #798965;outline-offset:5px}@media(max-width:600px){header{padding:20px;align-items:flex-start}.brand{font-size:20px}nav{flex-direction:column;align-items:flex-end;gap:12px}main{padding:44px 20px}.gallery{grid-template-columns:1fr;gap:20px}}@media(prefers-reduced-motion:reduce){.gallery img{transition:none}}
+:root{color-scheme:light;--background:#faf9f5;--text:#434840;--border:#e4e5dc;--muted:#727865;--secondary:#656b5f;--accent:#9da58d;--surface:#fff;--image-background:#eeede5;--input-border:#8b927f;--button:#555f49;--button-text:#fff;--error:#923a32;--focus:#798965;--footer:#7a806e}
+:root[data-theme="dark"]{color-scheme:dark;--background:#1c201b;--text:#e0e3d9;--border:#363d32;--muted:#abb39e;--secondary:#bcc3b2;--accent:#89967b;--surface:#252b22;--image-background:#2b3127;--input-border:#758368;--button:#a7b994;--button-text:#1c201b;--error:#f0a59b;--focus:#b6ca9e;--footer:#abb39e}
+:root{font-family:system-ui,sans-serif;color:var(--text);background:var(--background);font-synthesis:none}*{box-sizing:border-box}body{margin:0}a{color:inherit;text-underline-offset:4px}header{max-width:1160px;margin:auto;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--border)}.brand{font-family:Georgia,serif;font-size:23px;text-decoration:none}nav{display:flex;align-items:center;gap:24px;font-size:14px}.nav-items{display:flex;align-items:center;gap:24px}nav a{cursor:pointer}nav a:hover{cursor:pointer}nav [aria-current="page"]{text-decoration:none;cursor:default}nav form{margin:0}main{max-width:1100px;margin:auto;padding:64px 32px}.heading{text-align:center;margin-bottom:40px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.2em;color:var(--muted)}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(32px,5vw,52px);line-height:1.15;margin:20px 0}.dates{color:var(--muted)}.line{display:block;width:44px;height:1px;background:var(--accent);margin:28px auto}.intro{text-align:center;max-width:590px;margin:0 auto 48px;line-height:1.8;color:var(--secondary)}.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}figure{margin:0}.gallery a{display:block;overflow:hidden;border-radius:4px;background:var(--image-background)}.gallery img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .3s}.gallery a:hover img{transform:scale(1.025)}figcaption{font-size:14px;padding:16px 0;color:var(--secondary)}footer{text-align:center;padding:32px;font-family:Georgia,serif;font-style:italic;color:var(--footer);border-top:1px solid var(--border)}.login{max-width:400px;margin:auto;padding:32px;background:var(--surface);border:1px solid var(--border);border-radius:6px}label{display:block;margin-bottom:10px}input{font:inherit;color:var(--text);background:var(--background);width:100%;padding:12px;border:1px solid var(--input-border);border-radius:3px}button{font:inherit;background:var(--button);color:var(--button-text);padding:12px 24px;border:0;border-radius:3px;cursor:pointer}.login button{margin-top:20px;width:100%}.quiet{padding:0;background:transparent;color:inherit;text-decoration:underline;text-underline-offset:4px}.error{color:var(--error);line-height:1.5}.skip{position:absolute;top:-100px;left:12px}.skip:focus{top:12px;background:var(--surface);padding:12px;z-index:10}:focus-visible{outline:3px solid var(--focus);outline-offset:5px}@media(max-width:600px){header{padding:20px;align-items:flex-start}.brand{font-size:20px}nav{gap:12px;align-items:flex-start}.nav-items{flex-direction:column;align-items:flex-end;gap:12px}main{padding:44px 20px}.gallery{grid-template-columns:1fr;gap:20px}}@media(prefers-reduced-motion:reduce){.gallery img{transition:none}}
+</style>
+
+<style>
+.theme-toggle{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:32px;height:32px;padding:0;background:transparent;color:var(--muted);border-radius:50%;margin:-7px 0}
+.theme-toggle:hover{color:var(--text);background:var(--image-background)}
+@media(max-width:380px){header{gap:12px}.brand{font-size:18px}nav{font-size:12px;gap:8px}.nav-items{white-space:nowrap}}
+.theme-toggle .sun{display:none}
+:global([data-theme="dark"]) .theme-toggle .moon{display:none}
+:global([data-theme="dark"]) .theme-toggle .sun{display:block}
 </style>
