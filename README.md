@@ -1,6 +1,6 @@
 # Memorial website
 
-A light, responsive memorial website with a public gallery and a password-protected area for family and friends. Astro renders `/` at build time; the Node server handles sign-in, the private gallery, and private WebP images. PhotoSwipe provides zoom, arrow-key navigation, Escape to close, and touch navigation. Without JavaScript, image links open the large image version. The included abstract SVGs are neutral placeholders. Music is not integrated yet; a dedicated Astro component can be added to the layout later.
+A light, responsive memorial website with a public gallery and a password-protected area for family and friends. Astro renders `/` at build time; the Node server handles sign-in, the private gallery, and private WebP images. PhotoSwipe provides zoom, arrow-key navigation, Escape to close, and touch navigation. Without JavaScript, image links open the large image version. Images are supplied locally and are not tracked by Git. Music is not integrated yet; a dedicated Astro component can be added to the layout later.
 
 ## Setup
 
@@ -33,9 +33,16 @@ If you change `HTTP_PORT`, `SITE_ORIGIN` must exactly match the browser address:
 
 ## Editing content
 
-`content/site.json` contains `title`, optional `lifeDates`, `introduction`, and ordered `public` and `private` lists. Each photo has a `source` relative to `content/photos/`, descriptive `alt` text, and an optional `caption`. Store images only in that directory, never in `public/`. Paths outside the image directory, including paths reached through symlinks, are rejected.
+`content/site.json` contains `title`, optional `lifeDates`, `introduction`, and ordered `public` and `private` lists. Each photo has a `source` filename, descriptive `alt` text, and an optional `caption`. Put the original files in the folder matching their gallery:
 
-The build generates WebP thumbnails (up to 640 pixels) and large versions (up to 1920 pixels), corrects orientation, and removes image metadata. Original images are not copied. Public variants are stored in `public/bilder/`; private variants are stored in `.generated/privat/`. Private metadata is read only on the server; the public JSON contains no private list. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
+- `content/photos/public/`: originals for the public gallery.
+- `content/photos/private/`: originals for the password-protected gallery.
+
+For example, a public entry with `"source": "licht.svg"` reads `content/photos/public/licht.svg`; a private entry with `"source": "naehe.svg"` reads `content/photos/private/naehe.svg`. Nested paths within the matching folder are supported. Paths outside that folder, including paths reached through symlinks, are rejected.
+
+Both folders are kept in Git using empty `.gitkeep` files. Original images and generated variants are ignored; existing images remain on your computer. A fresh clone contains no images: supply every file referenced in `content/site.json`, or replace the lists with your own entries before building. Use empty lists (`[]`) for galleries without photos. Keep a separate backup of your originals. Never put private originals in Astro's `public/` directory, whose contents are served directly.
+
+The build generates WebP thumbnails (up to 640 pixels) and large versions (up to 1920 pixels), corrects orientation, and removes image metadata. Original images are not copied. Public variants are stored in `public/images/`; private variants are stored in `.generated/private/`. Private metadata is read only on the server; the public JSON contains no private list. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
 
 ## Local production and verification
 
@@ -83,16 +90,74 @@ gedenken.example.org {
 
 Set `SITE_ORIGIN=https://gedenken.example.org` for this configuration. Caddy handles HTTPS. Never configure the proxy to cache private responses or route authentication requests away from the application server. Applying new authentication settings requires `docker compose --env-file .env up -d --force-recreate`.
 
-## GHCR and CI
+## Build and publish Docker images locally
 
-The GitHub Action checks pull requests, pushes to `main`, `v*` tags, and manual runs. After successful Astro checks, builds, and production/development access tests, it publishes only from `main` and version tags to `ghcr.io/<owner>/<repository>` for `linux/amd64`. Image tags are `sha-<full commit ID>`, `latest` for main, and the release version without `v`. Authentication uses `GITHUB_TOKEN`; there is no automatic server deployment.
+There are no GitHub Actions. Build and publish from your own computer after adding your local images and updating `content/site.json`. Start Docker Desktop (or your Docker daemon), then run these commands from the repository root.
 
-The GHCR package must remain **private**. Check package and repository permissions before the first push, then verify the package's visibility in GitHub. Use a token with `read:packages` to pull private images on the server:
+### Build
 
 ```sh
-printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u YOUR_USER --password-stdin
+docker build --target production -t gedenkseite:local .
+```
+
+Docker installs dependencies, checks the site, and generates the production build. You do not need Node installed on the host or an `.env` file to build. Both local image folders are included in the build context even though Git ignores them. The final image includes the processed public and private images; originals and `.env` files are excluded from the runtime image. Do not pass authentication secrets as build arguments.
+
+By default, Docker builds for your computer's architecture. If the server uses a different architecture, specify it when building, for example:
+
+```sh
+docker build --platform linux/amd64 --target production -t gedenkseite:local .
+```
+
+For an ARM64 server, use `--platform linux/arm64` instead. Cross-platform builds require Docker's emulation support.
+
+To run the image locally, complete the authentication setup above, set `IMAGE=gedenkseite:local` and `SITE_ORIGIN=http://localhost:4321` in `.env`, then run:
+
+```sh
+docker compose --env-file .env up -d
+```
+
+Open `http://localhost:4321`. Rebuild the image after changing content or images, then recreate the container with `docker compose --env-file .env up -d --force-recreate`.
+
+### Push to Docker Hub
+
+Create a **private** repository named `gedenkseite` in your Docker Hub account before pushing: the image contains private photos and metadata. Replace `YOUR_DOCKERHUB_USER` with your account name and choose a release tag (the examples use `1.0.0`).
+
+```sh
+docker login --username YOUR_DOCKERHUB_USER
+docker tag gedenkseite:local YOUR_DOCKERHUB_USER/gedenkseite:1.0.0
+docker push YOUR_DOCKERHUB_USER/gedenkseite:1.0.0
+```
+
+When prompted, enter a Docker Hub access token with push permission. See Docker's [repository setup](https://docs.docker.com/docker-hub/repos/create/) and [image push instructions](https://docs.docker.com/docker-hub/repos/manage/hub-images/push/).
+
+### Push to GitHub Container Registry (GHCR)
+
+Create a GitHub personal access token **(classic)** with `write:packages` permission. If your organization requires SSO, authorize the token for that organization. Replace `YOUR_GITHUB_USER` with your login and `YOUR_NAMESPACE` with your lowercase GitHub account or organization name.
+
+```sh
+docker login ghcr.io --username YOUR_GITHUB_USER
+docker tag gedenkseite:local ghcr.io/YOUR_NAMESPACE/gedenkseite:1.0.0
+docker push ghcr.io/YOUR_NAMESPACE/gedenkseite:1.0.0
+```
+
+Enter the token at the password prompt. GHCR creates new packages as private by default; verify that the package remains **private** and grant access only to the intended users. See GitHub's [Container registry documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
+### Pull and run on the server
+
+Log in to the chosen registry on the server. For Docker Hub, use a token with pull permission; for GHCR, use a classic token with `read:packages`. Copy the Compose file and create a server-specific `.env` using the authentication setup above. Set `SITE_ORIGIN` to the site's browser address and `IMAGE` to the full image name you pushed, for example:
+
+```dotenv
+# Docker Hub:
+IMAGE=YOUR_DOCKERHUB_USER/gedenkseite:1.0.0
+# Or GHCR (use only one IMAGE line):
+# IMAGE=ghcr.io/YOUR_NAMESPACE/gedenkseite:1.0.0
+```
+
+Then start or update the site:
+
+```sh
 docker compose --env-file .env pull
 docker compose --env-file .env up -d
 ```
 
-`IMAGE` in `.env` selects the GHCR image tag; `HTTP_PORT` is the local host port. Credentials remain runtime values read from `process.env` and are not embedded in Astro builds.
+Use a new release tag for each build and update `IMAGE` on the server before pulling. Authentication credentials remain runtime values and are not embedded in the site build.

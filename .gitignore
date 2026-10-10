@@ -2,7 +2,34 @@ node_modules/
 dist/
 .astro/
 .generated/
-public/bilder/
+public/images/
 .env
 .env.*
 !.env.example
+
+# Local image originals; retain only the empty directory markers.
+content/photos/public/*
+!content/photos/public/.gitkeep
+content/photos/private/*
+!content/photos/private/.gitkeep
+
+# Never commit image files, including generated variants.
+*.[sS][vV][gG]
+*.[pP][nN][gG]
+*.[jJ][pP][gG]
+*.[jJ][pP][eE][gG]
+*.[wW][eE][bB][pP]
+*.[gG][iI][fF]
+*.[aA][vV][iI][fF]
+*.[hH][eE][iI][cC]
+*.[hH][eE][iI][fF]
+*.[tT][iI][fF]
+*.[tT][iI][fF][fF]
+*.[bB][mM][pP]
+*.[iI][cC][oO]
+*.[rR][aA][wW]
+*.[dD][nN][gG]
+*.[cC][rR]2
+*.[cC][rR]3
+*.[nN][eE][fF]
+*.[aA][rR][wW]

@@ -31,7 +31,7 @@ try {
   for(const path of paths) {
     const response=await request(path); assert.equal(response.status,401); assert.equal(response.headers.get('cache-control'),'no-store');
   }
-  for(const path of ['/images/private-1-thumb.webp','/.generated/manifest.json','/.generated/private/private-1-large.webp','/content/site.json','/content/photos/naehe.svg', '/src/pages/private/index.astro?raw', `/@fs/${process.cwd()}/.generated/manifest.json`, `/@fs/${process.cwd()}/content/photos/naehe.svg`]) assert.ok([403,404].includes((await request(path)).status),path);
+  for(const path of ['/images/private-1-thumb.webp','/.generated/manifest.json','/.generated/private/private-1-large.webp','/content/site.json','/content/photos/private/naehe.svg', '/src/pages/private/index.astro?raw', `/@fs/${process.cwd()}/.generated/manifest.json`, `/@fs/${process.cwd()}/content/photos/private/naehe.svg`]) assert.ok([403,404].includes((await request(path)).status),path);
   for(const path of ['/api/login','/api/logout']) assert.equal((await post(path,'wrong',{headers:{Origin:'https://attacker.example'}})).status,403);
   assert.equal((await post('/api/login','wrong',{headers:{Origin:''}})).status,403);
   const wrong=await post('/api/login','wrong');
