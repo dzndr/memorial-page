@@ -4,11 +4,12 @@ interface Props { photos: Photo[]; }
 const { photos } = Astro.props;
 ---
 <div class="gallery" aria-label="Fotogalerie">
-{photos.map(photo => <figure><a href={photo.large.url} data-pswp-width={photo.large.width} data-pswp-height={photo.large.height} target="_blank" rel="noopener"><img src={photo.thumb.url} alt={photo.alt} width={photo.thumb.width} height={photo.thumb.height} loading="lazy"/></a>{photo.caption && <figcaption>{photo.caption}</figcaption>}</figure>)}
+  {photos.map(photo => (
+    <figure>
+      <a href={photo.large.url} target="_blank" rel="noopener">
+        <img src={photo.thumb.url} alt={photo.alt} width={photo.thumb.width} height={photo.thumb.height} loading="lazy"/>
+      </a>
+      {photo.caption && <figcaption>{photo.caption}</figcaption>}
+    </figure>
+  ))}
 </div>
-<script>
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
-import 'photoswipe/style.css';
-const lightbox = new PhotoSwipeLightbox({ gallery: '.gallery', children: 'a', pswpModule: () => import('photoswipe'), closeTitle: 'Schließen', zoomTitle: 'Vergrößern', arrowPrevTitle: 'Vorheriges Bild', arrowNextTitle: 'Nächstes Bild', errorMsg: 'Das Bild konnte nicht geladen werden.' });
-lightbox.init();
-</script>

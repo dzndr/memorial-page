@@ -1,9 +1,0 @@
----
-import Layout from '../layouts/Layout.astro';
-import { configuration, getSession } from '../lib/auth.mjs';
-
-const hasError = Astro.url.searchParams.get('error') === 'password';
-const config = configuration();
-const isLoggedIn = getSession(Astro.request, config);
----
-<Layout title="Erinnerungen im vertrauten Kreis" privatePage isLoggedIn={isLoggedIn}><p class="intro">Dieser Bereich ist für Familie und Freunde. Bitte gib das gemeinsame Passwort ein.</p><form class="login" method="post" action="/api/login">{hasError && <p class="error" role="alert" id="error">Das Passwort ist nicht richtig. Bitte versuche es erneut.</p>}<label for="password">Passwort</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024" aria-describedby={hasError ? 'error' : undefined}/><button type="submit">Anmelden</button></form></Layout>

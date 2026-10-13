@@ -15,10 +15,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build --chown=node:node /app/dist ./dist
-COPY --from=build --chown=node:node /app/.generated/private ./.generated/private
-COPY --from=build --chown=node:node /app/.generated/manifest.json ./.generated/manifest.json
 COPY --chown=node:node scripts/start.mjs ./scripts/start.mjs
-COPY --chown=node:node src/lib/auth.mjs ./src/lib/auth.mjs
 USER node
 EXPOSE 4321
 CMD ["node", "scripts/start.mjs"]

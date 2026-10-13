@@ -1,8 +1,6 @@
-import { configuration } from '../src/lib/auth.mjs';
 import { prepareImages } from './images.mjs';
 import { watch } from 'chokidar';
 import { spawn } from 'node:child_process';
-configuration();
 await prepareImages();
 let pending = false;
 let running = false;
