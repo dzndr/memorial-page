@@ -7,6 +7,9 @@ public/images/
 .env.*
 !.env.example
 
+# Local site configuration
+content/site.json
+
 # Local image originals; retain only the empty directory markers.
 content/photos/public/*
 !content/photos/public/.gitkeep
