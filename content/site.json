@@ -1,7 +1,6 @@
 {
-  "title": "In liebevoller Erinnerung",
-  "lifeDates": "01.01.2000 - 31.01.2001",
-  "introduction": "Erinnerungen bleiben. Diese Bilder bewahren kleine Augenblicke und die Spuren eines besonderen Menschen.",
+  "name": "Max Mustermann",
+  "subtitle": "In liebevoller Erinnerung",
   "public": [
     {"source":"licht.svg","alt":"Abstrakte Landschaft in warmem Abendlicht","caption":"Ein Moment der Ruhe"},
     {"source":"wege.svg","alt":"Abstrakte Wege durch sanfte Hügel","caption":"Gemeinsame Wege"},

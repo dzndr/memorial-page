@@ -33,16 +33,13 @@ If you change `HTTP_PORT`, `SITE_ORIGIN` must exactly match the browser address:
 
 ## Editing content
 
-`content/site.json` contains `title`, optional `lifeDates`, `introduction`, and ordered `public` and `private` lists. Each photo has a `source` filename, descriptive `alt` text, and an optional `caption`. Put the original files in the folder matching their gallery:
+`content/site.json` contains `name` and `subtitle`, and an ordered `public` photo list. Each photo has a `source` filename, descriptive `alt` text, and an optional `caption`. Put the original files in the folder `content/photos/public/`.
 
-- `content/photos/public/`: originals for the public gallery.
-- `content/photos/private/`: originals for the password-protected gallery.
+For example, a public entry with `"source": "licht.svg"` reads `content/photos/public/licht.svg`. Nested paths within the matching folder are supported. Paths outside that folder, including paths reached through symlinks, are rejected.
 
-For example, a public entry with `"source": "licht.svg"` reads `content/photos/public/licht.svg`; a private entry with `"source": "naehe.svg"` reads `content/photos/private/naehe.svg`. Nested paths within the matching folder are supported. Paths outside that folder, including paths reached through symlinks, are rejected.
+The folder is kept in Git using empty `.gitkeep` files. Original images and generated variants are ignored; existing images remain on your computer. A fresh clone contains no images: supply every file referenced in `content/site.json`, or replace the list with your own entries before building.
 
-Both folders are kept in Git using empty `.gitkeep` files. Original images and generated variants are ignored; existing images remain on your computer. A fresh clone contains no images: supply every file referenced in `content/site.json`, or replace the lists with your own entries before building. Use empty lists (`[]`) for galleries without photos. Keep a separate backup of your originals. Never put private originals in Astro's `public/` directory, whose contents are served directly.
-
-The build generates WebP thumbnails (up to 640 pixels) and large versions (up to 1920 pixels), corrects orientation, and removes image metadata. Original images are not copied. Public variants are stored in `public/images/`; private variants are stored in `.generated/private/`. Private metadata is read only on the server; the public JSON contains no private list. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
+The build generates WebP thumbnails (up to 640 pixels) and large versions (up to 1920 pixels), corrects orientation, and removes image metadata. Original images are not copied. Public variants are stored in `public/images/`. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
 
 ## Local production and verification
 

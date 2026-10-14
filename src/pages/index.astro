@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import Gallery from '../components/Gallery.astro';
 import publicContent from '../../.generated/public.json';
 ---
-<Layout title={publicContent.title} lifeDates={publicContent.lifeDates}>
-  <p class="intro">{publicContent.introduction}</p>
+<Layout name={publicContent.name} subtitle={publicContent.subtitle}>
   <Gallery photos={publicContent.public}/>
 </Layout>
