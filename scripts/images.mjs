@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { readFile, mkdir, rm, writeFile, realpath } from 'node:fs/promises';
+import { readFile, mkdir, rm, writeFile, realpath, readdir, cp } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 export const root = fileURLToPath(new URL('../', import.meta.url));
@@ -8,28 +8,38 @@ export async function prepareImages() {
   if (typeof content.name !== 'string' || !content.name.trim()) throw new Error('Name is missing');
   if (typeof content.subtitle !== 'string' || !content.subtitle.trim()) throw new Error('Subtitle is missing');
   const publicFolder = 'public/images';
+  const buildFolder = 'build/images';
   await rm(path.join(root, publicFolder), { recursive: true, force: true });
+  await rm(path.join(root, buildFolder), { recursive: true, force: true });
   await mkdir(path.join(root, publicFolder), { recursive: true });
+  await mkdir(path.join(root, buildFolder), { recursive: true });
   const manifest = { name: content.name, subtitle: content.subtitle, public: [] };
-  const visibility = 'public';
-  if (!Array.isArray(content[visibility])) throw new Error('Image list is missing');
-  const base = await realpath(path.join(root, 'content/photos', visibility));
-  for (const [index, item] of content[visibility].entries()) {
-    if (typeof item.source !== 'string' || typeof item.alt !== 'string' || !item.alt.trim()) throw new Error('Source or alt text is missing');
-    const source = await realpath(path.resolve(base, item.source));
-    if (!source.startsWith(base + path.sep)) throw new Error(`Image outside of content/photos/${visibility}`);
+  const base = await realpath(path.join(root, 'content/images'));
+  const files = (await readdir(base))
+    .filter(f => !f.startsWith('.') && f.endsWith('.svg'))
+    .sort();
+  for (const [index, filename] of files.entries()) {
+    const source = await realpath(path.join(base, filename));
+    if (!source.startsWith(base + path.sep)) throw new Error(`Image outside of content/images`);
     const input = await readFile(source);
-    const id = `${visibility}-${index + 1}`;
-    const directory = path.join(root, publicFolder);
+    const id = `public-${index + 1}`;
     const variants = {};
     for (const [name, size] of [['thumb', 640], ['large', 1920]]) {
       const file = `${id}-${name}.webp`;
-      const info = await sharp(input).rotate().resize({ width: size, height: size, fit: 'inside', withoutEnlargement: true }).webp({ quality: 82 }).toFile(path.join(directory, file));
+      const info = await sharp(input).rotate().resize({ width: size, height: size, fit: 'inside', withoutEnlargement: true }).webp({ quality: 82 }).toFile(path.join(root, buildFolder, file));
       variants[name] = { id: `${id}-${name}`, file, width: info.width, height: info.height, url: `/images/${file}` };
     }
-    manifest[visibility].push({ alt: item.alt, caption: item.caption || '', ...variants });
+    manifest.public.push({ ...variants });
   }
-  await mkdir(path.join(root, '.generated'), { recursive: true });
-  await writeFile(path.join(root, '.generated/public.json'), JSON.stringify(manifest, null, 2));
+  await mkdir(path.join(root, 'build'), { recursive: true });
+  await writeFile(path.join(root, 'build/public.json'), JSON.stringify(manifest, null, 2));
+  await mkdir(path.join(root, publicFolder), { recursive: true });
+  for (const [index, filename] of files.entries()) {
+    const id = `public-${index + 1}`;
+    for (const name of ['thumb', 'large']) {
+      const file = `${id}-${name}.webp`;
+      await cp(path.join(root, buildFolder, file), path.join(root, publicFolder, file));
+    }
+  }
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) await prepareImages();
