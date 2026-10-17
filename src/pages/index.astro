@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Gallery from '../components/Gallery.astro';
-import publicContent from '../../.generated/public.json';
+import publicContent from '../../build/public.json';
 ---
 <Layout name={publicContent.name} subtitle={publicContent.subtitle}>
   <Gallery photos={publicContent.public}/>

@@ -3,6 +3,7 @@ dist/
 .astro/
 .generated/
 public/images/
+build/
 .env
 .env.*
 !.env.example
@@ -11,6 +12,8 @@ public/images/
 content/site.json
 
 # Local image originals; retain only the empty directory markers.
+content/images/*
+!content/images/.gitkeep
 content/photos/public/*
 !content/photos/public/.gitkeep
 content/photos/private/*

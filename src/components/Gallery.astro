@@ -1,5 +1,5 @@
 ---
-interface Photo { alt: string; caption?: string; thumb: { url: string; width: number; height: number }; large: { url: string; width: number; height: number }; }
+interface Photo { thumb: { url: string; width: number; height: number }; large: { url: string; width: number; height: number }; }
 interface Props { photos: Photo[]; }
 const { photos } = Astro.props;
 ---
@@ -7,9 +7,8 @@ const { photos } = Astro.props;
   {photos.map(photo => (
     <figure>
       <a href={photo.large.url} target="_blank" rel="noopener">
-        <img src={photo.thumb.url} alt={photo.alt} width={photo.thumb.width} height={photo.thumb.height} loading="lazy"/>
+        <img src={photo.thumb.url} width={photo.thumb.width} height={photo.thumb.height} loading="lazy"/>
       </a>
-      {photo.caption && <figcaption>{photo.caption}</figcaption>}
     </figure>
   ))}
 </div>
