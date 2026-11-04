@@ -2,7 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 import Gallery from '../components/Gallery.astro';
 import publicContent from '../../build/public.json';
+
+type Theme = 'light' | 'dark' | 'auto';
+const theme = publicContent.theme as Theme;
 ---
-<Layout name={publicContent.name} subtitle={publicContent.subtitle}>
+<Layout name={publicContent.name} subtitle={publicContent.subtitle} theme={theme}>
   <Gallery photos={publicContent.public}/>
 </Layout>

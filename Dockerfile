@@ -9,9 +9,7 @@ CMD ["npm", "run", "dev"]
 FROM development AS build
 RUN npm run check && npm run build
 
-FROM node:22-bookworm-slim AS production
-WORKDIR /app
-COPY --from=build --chown=node:node /app/dist ./dist
-USER node
+FROM nginx:alpine AS production
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 4321
-CMD ["npx", "serve", "dist"]

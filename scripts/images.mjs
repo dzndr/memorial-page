@@ -7,13 +7,15 @@ export async function prepareImages() {
   const content = JSON.parse(await readFile(path.join(root, 'content/site.json'), 'utf8'));
   if (typeof content.name !== 'string' || !content.name.trim()) throw new Error('Name is missing');
   if (typeof content.subtitle !== 'string' || !content.subtitle.trim()) throw new Error('Subtitle is missing');
+  const theme = content.theme ?? 'auto';
+  if (theme !== 'light' && theme !== 'dark' && theme !== 'auto') throw new Error('Theme must be light, dark or auto');
   const publicFolder = 'public/images';
   const buildFolder = 'build/images';
   await rm(path.join(root, publicFolder), { recursive: true, force: true });
   await rm(path.join(root, buildFolder), { recursive: true, force: true });
   await mkdir(path.join(root, publicFolder), { recursive: true });
   await mkdir(path.join(root, buildFolder), { recursive: true });
-  const manifest = { name: content.name, subtitle: content.subtitle, public: [] };
+  const manifest = { name: content.name, subtitle: content.subtitle, theme, public: [] };
   const base = await realpath(path.join(root, 'content/images'));
   const imageExtensions = ['.svg', '.jpg', '.jpeg', '.png', '.webp'];
   const files = (await readdir(base))

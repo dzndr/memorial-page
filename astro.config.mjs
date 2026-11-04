@@ -10,7 +10,6 @@ export default defineConfig({
         deny: [
           '.env', '.env.*',
           '**/content/**',
-          '**/.generated/**',
           '**/scripts/**',
           '**/tests/**'
         ]

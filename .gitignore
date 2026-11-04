@@ -1,23 +1,14 @@
 node_modules/
 dist/
 .astro/
-.generated/
-public/images/
 build/
+public/images/
 .env
-.env.*
-!.env.example
 
-# Local site configuration
+# Local configuration and image originals; retain only the empty directory marker.
 content/site.json
-
-# Local image originals; retain only the empty directory markers.
 content/images/*
 !content/images/.gitkeep
-content/photos/public/*
-!content/photos/public/.gitkeep
-content/photos/private/*
-!content/photos/private/.gitkeep
 
 # Never commit image files, including generated variants.
 *.[sS][vV][gG]
