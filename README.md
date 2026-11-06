@@ -1,6 +1,6 @@
 # Memorial website
 
-A light, responsive memorial page built with Astro. The site has a single page: a name and subtitle above a public photo gallery. PhotoSwipe provides zoom, arrow-key navigation, Escape to close, and touch navigation. Without JavaScript, image links open the large image version. The color theme is chosen at build time and baked into the page.
+A light, responsive memorial page built with Astro. The site has a single page: a name and subtitle above a public photo gallery. SimpleLightbox provides zoom, arrow-key navigation, Escape to close, and touch navigation. Without JavaScript, image links open the large image version. The color theme is chosen at build time and baked into the page.
 
 Images are supplied locally in `content/images/` and are not tracked by Git. The site itself is fully static; authentication and a private area were removed in a previous iteration.
 
