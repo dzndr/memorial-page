@@ -1,5 +1,10 @@
 {
   "name": "Max Mustermann",
   "subtitle": "In liebevoller Erinnerung",
-  "theme": "auto"
+  "theme": "auto",
+  "gallery": [
+    { "image": "images/photo-1.jpg", "objectPosition": "center 25%" },
+    { "youtube": "https://www.youtube-nocookie.com/embed/VIDEO_ID" },
+    { "image": "images/photo-2.jpg" }
+  ]
 }

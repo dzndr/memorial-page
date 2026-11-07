@@ -29,13 +29,23 @@ npm run dev
 
 ## Editing content
 
-- `content/site.json` holds the page `name` and `subtitle`, plus an optional `theme`:
+- `content/site.json` holds the page `name`, `subtitle`, optional `theme`, and ordered `gallery` list:
   - `auto` (default) follows the browser/system color scheme.
   - `light` always uses the light theme.
   - `dark` always uses the dark theme.
-- Photo originals go into the top level of `content/images/`. Every image file (`.svg`, `.jpg`, `.jpeg`, `.png`, `.webp`) in that folder becomes a gallery entry, in alphabetical filename order. Rename files to reorder the gallery; hidden files and subfolders are ignored.
+- Each gallery item is either an image path relative to `content/`, or a YouTube embed URL. Order the array to order the page. Image entries may set `objectPosition` to control the crop focal point:
 
-The build (`scripts/images.mjs`) generates a WebP thumbnail (up to 320 pixels) and a large version (up to 1200 pixels) for every photo, corrects orientation, removes metadata, and writes the resulting manifest to `build/public.json`. Variants are stored in `public/images/`. Originals are not copied into the output. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
+  ```json
+  "gallery": [
+    { "image": "images/photo-1.jpg", "objectPosition": "center 25%" },
+    { "youtube": "https://www.youtube-nocookie.com/embed/VIDEO_ID" },
+    { "image": "images/photo-2.png" }
+  ]
+  ```
+
+  Image paths must remain inside `content/` and use `.svg`, `.jpg`, `.jpeg`, `.png`, or `.webp`. YouTube sources must be HTTPS URLs from YouTube or YouTube NoCookie.
+
+The build (`scripts/images.mjs`) generates a WebP thumbnail (up to 320 pixels) and a large version (up to 1200 pixels) for each image listed in the gallery, corrects orientation, removes metadata, and writes the resulting manifest to `build/public.json`. Variants are stored in `public/images/`. Originals are not copied into the output. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
 
 ## Local production and verification
 

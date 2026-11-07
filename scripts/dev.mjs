@@ -16,6 +16,6 @@ async function rebuild() {
 }
 const watcher = watch('content', { ignoreInitial: true, awaitWriteFinish: { stabilityThreshold: 250 } });
 watcher.on('all', rebuild);
-const child = spawn(process.execPath, ['node_modules/.bin/astro', 'dev', '--ignore-lock', '--host', '0.0.0.0'], { stdio: 'inherit', env: process.env });
+const child = spawn(process.execPath, ['node_modules/astro/bin/astro.mjs', 'dev', '--ignore-lock', '--host', '0.0.0.0'], { stdio: 'inherit', env: process.env });
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));
 child.on('exit', async code => { await watcher.close(); process.exit(code ?? 1); });
