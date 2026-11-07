@@ -45,6 +45,8 @@ npm run dev
 
   Image paths must remain inside `content/` and use `.svg`, `.jpg`, `.jpeg`, `.png`, or `.webp`. YouTube sources must be HTTPS URLs from YouTube or YouTube NoCookie.
 
+- To add a favicon, place one file named `favicon` with any extension directly in `content/` (for example, `content/favicon.svg`, `content/favicon.ico`, or `content/favicon.png`). It is copied unchanged into the public output and included automatically. Omit it to use no favicon.
+
 The build (`scripts/images.mjs`) generates a WebP thumbnail (up to 320 pixels) and a large version (up to 1200 pixels) for each image listed in the gallery, corrects orientation, removes metadata, and writes the resulting manifest to `build/public.json`. Variants are stored in `public/images/`. Originals are not copied into the output. In production, every content change requires a new build. For very small originals, the resized variants may have identical dimensions.
 
 ## Local production and verification

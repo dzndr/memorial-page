@@ -19,14 +19,17 @@ const { gallery } = Astro.props;
 </div>
 
 <script>
-import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+
+if (!('global' in globalThis)) {
+  Object.defineProperty(globalThis, 'global', { value: globalThis, configurable: true });
+}
+
+const { default: SimpleLightbox } = await import('simplelightbox/dist/simple-lightbox.esm.js');
+
 new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionPosition: 'bottom',
-  animationSpeed: 250,
-  closeText: '×',
-  navText: ['←', '→'],
+  animationSpeed: 100,
+  overlayOpacity: 0.8,
   alertErrorMessage: 'Das Bild konnte nicht geladen werden.'
 });
 </script>
@@ -97,5 +100,15 @@ figcaption {
   .gallery img {
     transition: none;
   }
+}
+</style>
+
+<style is:global>
+.sl-overlay {
+  background: var(--background) !important;
+}
+
+.sl-navigation button, .sl-close, .sl-counter {
+  color: var(--text) !important;
 }
 </style>

@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import { readFile, mkdir, rm, writeFile, realpath, cp } from 'node:fs/promises'
+import { readFile, mkdir, rm, writeFile, realpath, readdir, cp } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 export const root = fileURLToPath(new URL('../', import.meta.url))
@@ -29,6 +29,24 @@ function validateYouTubeSource(value, index) {
   return url.toString()
 }
 
+async function prepareFavicon(contentFolder) {
+  const publicFolder = path.join(root, 'public')
+  await mkdir(publicFolder, { recursive: true })
+  const publicFiles = await readdir(publicFolder, { withFileTypes: true })
+  await Promise.all(publicFiles
+    .filter(entry => entry.isFile() && /^favicon\./i.test(entry.name))
+    .map(entry => rm(path.join(publicFolder, entry.name))))
+
+  const contentFiles = await readdir(contentFolder, { withFileTypes: true })
+  const favicons = contentFiles.filter(entry => entry.isFile() && /^favicon\.[^.]+$/i.test(entry.name))
+  if (favicons.length > 1) throw new Error('Only one content/favicon.* file is allowed')
+  if (favicons.length === 0) return undefined
+
+  const filename = favicons[0].name
+  await cp(path.join(contentFolder, filename), path.join(publicFolder, filename))
+  return `/${filename}`
+}
+
 export async function prepareImages() {
   const content = JSON.parse(await readFile(path.join(root, 'content/site.json'), 'utf8'))
   if (typeof content.name !== 'string' || !content.name.trim()) throw new Error('Name is missing')
@@ -42,8 +60,9 @@ export async function prepareImages() {
   await rm(path.join(root, buildFolder), { recursive: true, force: true })
   await mkdir(path.join(root, publicFolder), { recursive: true })
   await mkdir(path.join(root, buildFolder), { recursive: true })
-  const manifest = { name: content.name, subtitle: content.subtitle, theme, gallery: [] }
   const contentFolder = await realpath(path.join(root, 'content'))
+  const favicon = await prepareFavicon(contentFolder)
+  const manifest = { name: content.name, subtitle: content.subtitle, theme, ...(favicon ? { favicon } : {}), gallery: [] }
   const generatedImages = []
   for (const [index, entry] of content.gallery.entries()) {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw galleryError(index, 'must be an image or youtube object')

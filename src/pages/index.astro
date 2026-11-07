@@ -6,6 +6,6 @@ import publicContent from '../../build/public.json';
 type Theme = 'light' | 'dark' | 'auto';
 const theme = publicContent.theme as Theme;
 ---
-<Layout name={publicContent.name} subtitle={publicContent.subtitle} theme={theme}>
+<Layout name={publicContent.name} subtitle={publicContent.subtitle} theme={theme} favicon={publicContent.favicon}>
   <Gallery gallery={publicContent.gallery}/>
 </Layout>

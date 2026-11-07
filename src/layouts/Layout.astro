@@ -1,6 +1,6 @@
 ---
-interface Props { name: string; subtitle: string; theme: 'light' | 'dark' | 'auto'; }
-const { name, subtitle, theme } = Astro.props;
+interface Props { name: string; subtitle: string; theme: 'light' | 'dark' | 'auto'; favicon?: string; }
+const { name, subtitle, theme, favicon } = Astro.props;
 ---
 <!doctype html>
 <html lang="de" data-theme={theme}>
@@ -8,6 +8,7 @@ const { name, subtitle, theme } = Astro.props;
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="robots" content="index, follow"/>
+  {favicon && <link rel="icon" href={favicon} />}
   <title>{name}</title>
 </head>
 <body>
